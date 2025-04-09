@@ -1,0 +1,261 @@
+/* Kolory i tło */
+:root {
+    --primary-color: #321c0c;
+    --secondary-color: #1a1a1a;
+    --accent-color: #ffb700;
+    --text-color: #ffffff;
+    --bg-color: #191919;
+  }
+  
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    background-image: url("/textures/bg.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  
+  header {
+    background-color: rgba(50, 28, 12, 0.85);
+    padding: 1rem;
+    text-align: center;
+    color: var(--accent-color);
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
+  
+  .login-container, .app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+  
+  button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #e6a500;
+  }
+  
+  .stats-bar {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 800px;
+    margin: 1rem 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: 0.75rem;
+  }
+  
+  .stat {
+    text-align: center;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: var(--accent-color);
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  .lootbox-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    margin-top: 2rem;
+  }
+  
+  .items-display {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+    border: 3px solid var(--accent-color);
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .selector {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background-color: var(--accent-color);
+    transform: translateX(-50%);
+    z-index: 2;
+  }
+  
+  .items-slider {
+    display: flex;
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: left 2s ease-in-out;
+    left: 0;
+  }
+  
+  .items-slider img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    margin-right: 5px;
+  }
+  
+  .controls {
+    margin-top: 1rem;
+  }
+  
+  .result-container {
+    margin-top: 2rem;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 1rem;
+    border: 2px solid var(--accent-color);
+    border-radius: 1rem;
+    animation: popIn 0.5s ease-out;
+  }
+  
+  @keyframes popIn {
+    0% {
+      transform: scale(0.7);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .result-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+  }
+  
+  .result-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+  }
+  
+  .result-rarity {
+    font-size: 1rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+    color: var(--accent-color);
+  }
+  
+  footer {
+    margin-top: auto;
+    padding: 1rem;
+    font-size: 0.8rem;
+    color: #aaa;
+    text-align: center;
+  }
+
+  .spinning-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 10px;
+    animation: spinIn 1.2s linear infinite;
+  }
+  
+  @keyframes spinIn {
+    0% {
+      transform: scale(0.7) rotateY(0deg);
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1) rotateY(180deg);
+    }
+    100% {
+      transform: scale(0.7) rotateY(360deg);
+      opacity: 0.5;
+    }
+  }
+
+  .lootbox-container {
+    margin-top: 2rem;
+    overflow: hidden;
+  }
+  
+  .items-display {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    border: 2px solid gold;
+    margin-bottom: 1rem;
+  }
+  
+  .selector {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    height: 100%;
+    width: 5px;
+    border-left: 1px solid red;
+    border-right: 1px solid red;
+    pointer-events: none;
+  }
+  
+  .items-slider {
+    display: flex;
+    transition: transform 0s;
+    will-change: transform;
+  }
+  
+  .slider-item {
+    min-width: 120px;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .legendary {
+    border: 3px solid gold;
+    box-shadow: 0 0 15px gold;
+  }
+  
+  .epic {
+    border: 3px solid purple;
+    box-shadow: 0 0 10px purple;
+  }
+  
+  .rare {
+    border: 3px solid royalblue;
+    box-shadow: 0 0 5px royalblue;
+  }
+  
+  .uncommon {
+    border: 2px solid green;
+  }
+  
+  .common {
+    border: 1px solid gray;
+  }
+  
+  
+  

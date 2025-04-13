@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-//import LoginPage from "./pages/LoginPage";
+import LoginPage from "./pages/LoginPage";
 import GamePage from "./pages/GamePage";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
@@ -21,7 +21,7 @@ function App() {
 
   return (
     <Routes>
-     {/*<Route
+      <Route
         path="/login"
         element={!user ? <LoginPage /> : <Navigate to="/game" />}
       />
@@ -32,7 +32,7 @@ function App() {
       <Route
         path="*"
         element={<Navigate to={user ? "/game" : "/login"} />}
-      />*/}
+      />*/
     <Route path="*" element={<GamePage />} />
     </Routes>
   );

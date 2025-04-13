@@ -6,13 +6,13 @@ import { getAnalytics } from "firebase/analytics";
 
 // Konfiguracja projektu Firebase (placeholder – wstawić własne config z Firebase console)
 const firebaseConfig = {
-  apiKey: "AIzaSy...ABC",
-  authDomain: "metin2-treasure.firebaseapp.com",
-  projectId: "metin2-treasure",
-  storageBucket: "metin2-treasure.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef123456",
-  measurementId: "G-XYZ123ABC"
+  apiKey: "AIzaSyBRuVYG0hsaldjGQcq5JBSFNP8McmqA6vA",
+  authDomain: "metin2-cc447.firebaseapp.com",
+  projectId: "metin2-cc447",
+  storageBucket: "metin2-cc447.firebasestorage.app",
+  messagingSenderId: "217543613975",
+  appId: "1:217543613975:web:b89d2a6614c1b41c7f8652",
+  measurementId: "G-5TKR341EDZ"
 };
 
 // Inicjalizacja Firebase

@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
-// import { auth, db } from "../firebase";
-// import { signOut, onAuthStateChanged } from "firebase/auth";
-// import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 import Header from "../components/Header";
 import StatsBar from "../components/StatsBar";
-
+import Lootbox from "../components/Lootbox";
 import ResultModal from "../components/ResultModal";
-import LootboxReel from "../components/LootboxReel";
 
 {/* function GamePage() {
   const [user, setUser] = useState(null);
@@ -117,11 +115,12 @@ function GamePage() {
   const [multiplier, setMultiplier] = useState(1.0);
   const [rank, setRank] = useState("Początkujący");
   const [result, setResult] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [items, setItems] = useState([]);
   const spinCost = 100;
 
-
-  const items = [
+{/*   const items = [
     { id: 1, name: "Miecz Smogorożca", img: "/api/placeholder/60/60", rarity: "legendary", chance: 5, value: 5000 },
     { id: 2, name: "Zbroja Niebieskiego Smoka", img: "/api/placeholder/60/60", rarity: "epic", chance: 10, value: 2000 },
     { id: 3, name: "Miecz Czerwonego Smoka", img: "/api/placeholder/60/60", rarity: "epic", chance: 10, value: 1800 },
@@ -148,7 +147,7 @@ function GamePage() {
     { id: 24, name: "Kolczuga Strażnika", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 21, value: 470 },
     { id: 25, name: "Pas Wojownika", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 20, value: 400 },
     { id: 26, name: "Sztylet Złodzieja", img: "/api/placeholder/60/60", rarity: "common", chance: 25, value: 150 },
-    { id: 27, name: "Pierścień Odporności", img: "/assets/items/item-1.png", rarity: "common", chance: 30, value: 100 },
+    { id: 27, name: "Pierścień Odporności", img: "/api/placeholder/60/60", rarity: "common", chance: 30, value: 100 },
     { id: 28, name: "Kaptur Zwiadowcy", img: "/api/placeholder/60/60", rarity: "common", chance: 28, value: 90 },
     { id: 29, name: "Skórzana Kamizelka", img: "/api/placeholder/60/60", rarity: "common", chance: 35, value: 80 },
     { id: 30, name: "Stary Łuk", img: "/api/placeholder/60/60", rarity: "common", chance: 40, value: 70 },
@@ -162,66 +161,90 @@ function GamePage() {
     { id: 38, name: "Skórzane Rękawice", img: "/api/placeholder/60/60", rarity: "common", chance: 35, value: 50 },
     { id: 39, name: "Złamana Włócznia", img: "/api/placeholder/60/60", rarity: "common", chance: 45, value: 30 },
     { id: 40, name: "Zbutwiałe Buty", img: "/api/placeholder/60/60", rarity: "common", chance: 50, value: 20 }
-  ];
+  ]; */}
 
-  const handleLogout = () => {
-    alert("Wylogowanie wyłączone w trybie offline");
-  };
-
-  const handleSpin = () => {
-    if (isSpinning || (!freeSpins && balance < spinCost)) return;
-    
-    // Resetuj poprzedni wynik
-    setResult(null);
-    
-    if (freeSpins > 0) {
-      setFreeSpins(freeSpins - 1);
-    } else {
-      setBalance(balance - spinCost);
+// Pobieranie itemow z firebase
+useEffect(() => {
+  const fetchItems = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "items"));
+      const itemList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setItems(itemList);
+    } catch (error) {
+      console.error("Błąd pobierania przedmiotów:", error);
     }
-    
-    setIsSpinning(true);
-    navigator.vibrate?.([100, 50, 100]);
   };
 
+  fetchItems();
+}, []);
 
-const handleSpinComplete = (item) => {
-  if (item) {
-    console.log("GamePage otrzymał przedmiot:", item);
-    
-    // Oblicz nowy stan gry na podstawie wylosowanego przedmiotu
-    const newBalance = balance + Math.floor(item.value * multiplier);
-    setBalance(newBalance);
-    setMultiplier((prev) => Math.min(5.0, Math.round((prev + 0.5) * 10) / 10));
-    setRank("Legenda");
-    
-    // Upewnij się, że przekazujesz kompletny obiekt
-    setResult({...item});
-  }
-  setIsSpinning(false);
+const handleLogout = () => {
+  alert("Wylogowanie wyłączone w trybie offline");
 };
 
-  return (
-    <div className="app-container">
-      <Header onLogout={handleLogout} />
-      <StatsBar
-        balance={balance}
-        freeSpins={freeSpins}
-        multiplier={multiplier}
-        rank={rank}
-      />
-      <LootboxReel
+const handleSpin = () => {
+  if (isSpinning || (!freeSpins && balance < spinCost) || items.length === 0) return;
+
+  if (freeSpins > 0) {
+    setFreeSpins(freeSpins - 1);
+  } else {
+    setBalance(balance - spinCost);
+  }
+
+  navigator.vibrate?.([100, 50, 100]);
+
+  // Losowanie przedmiotu wg szans
+  const totalWeight = items.reduce((sum, item) => sum + item.chance, 0);
+  const roll = Math.random() * totalWeight;
+  let cumulative = 0;
+  let rolledItem = items[0];
+
+  for (let i = 0; i < items.length; i++) {
+    cumulative += items[i].chance;
+    if (roll <= cumulative) {
+      rolledItem = items[i];
+      break;
+    }
+  }
+
+  setSelectedItem(rolledItem);
+  setIsSpinning(true);
+};
+
+const handleSpinComplete = (item) => {
+  const newBalance = balance + Math.floor(item.value * multiplier);
+  setBalance(newBalance);
+  setMultiplier((prev) => Math.min(5.0, Math.round((prev + 0.5) * 10) / 10));
+  setRank("Legenda");
+  setIsSpinning(false);
+  setResult(item);
+};
+
+return (
+  <div className="app-container">
+    <Header onLogout={handleLogout} />
+    <StatsBar
+      balance={balance}
+      freeSpins={freeSpins}
+      multiplier={multiplier}
+      rank={rank}
+    />
+    <Lootbox
       items={items}
+      selectedItem={selectedItem}
       onSpin={handleSpin}
       isSpinning={isSpinning}
       freeSpins={freeSpins}
       spinCost={spinCost}
       onSpinComplete={handleSpinComplete}
     />
-        <ResultModal result={result} onClose={() => setResult(null)} />
-      <footer>Metin2 Treasure Rush © 2025 - Symulator Skrzynek</footer>
-    </div>
-  );
+    <ResultModal result={result} onClose={() => setResult(null)} />
+    <footer>Metin2 Treasure Rush © 2025 - Symulator Skrzynek</footer>
+  </div>
+);
 }
 
 export default GamePage;

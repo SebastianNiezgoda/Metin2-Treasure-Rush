@@ -5,109 +5,7 @@ import Header from "../components/Header";
 import StatsBar from "../components/StatsBar";
 import Lootbox from "../components/Lootbox";
 import ResultModal from "../components/ResultModal";
-
-{/* function GamePage() {
-  const [user, setUser] = useState(null);
-  const [balance, setBalance] = useState(1000);
-  const [freeSpins, setFreeSpins] = useState(0);
-  const [multiplier, setMultiplier] = useState(1.0);
-  const [rank, setRank] = useState("Początkujący");
-  const [result, setResult] = useState(null);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const spinCost = 100;
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            balance: 1000,
-            freeSpins: 0,
-            multiplier: 1.0,
-            rank: "Początkujący"
-          });
-        } else {
-          const data = userSnap.data();
-          setBalance(data.balance);
-          setFreeSpins(data.freeSpins);
-          setMultiplier(data.multiplier);
-          setRank(data.rank);
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    await signOut(auth);
-  };
-
-  const handleSpin = async () => {
-    if (isSpinning || (!freeSpins && balance < spinCost)) return;
-
-    setIsSpinning(true);
-    if (freeSpins > 0) {
-      setFreeSpins(freeSpins - 1);
-    } else {
-      setBalance(balance - spinCost);
-    }
-
-    navigator.vibrate?.([100, 50, 100]);
-
-    // Symulacja wylosowanego przedmiotu
-    const item = {
-      name: "Miecz Smogorożca",
-      rarity: "legendary",
-      value: 5000,
-      img: "/api/placeholder/60/60"
-    };
-
-    setTimeout(() => {
-      const newBalance = balance + Math.floor(item.value * multiplier);
-      setResult(item);
-      setBalance(newBalance);
-      setMultiplier((prev) => Math.min(5.0, Math.round((prev + 0.5) * 10) / 10));
-      setRank("Legenda");
-      setIsSpinning(false);
-
-      updateDoc(doc(db, "users", user.uid), {
-        balance: newBalance,
-        freeSpins: freeSpins > 0 ? freeSpins - 1 : 0,
-        multiplier,
-        rank: "Legenda"
-      });
-    }, 3000);
-  };
-
-  if (!user) return null;
-
-  return (
-    <div className="app-container">
-      <Header onLogout={handleLogout} />
-      <StatsBar
-        balance={balance}
-        freeSpins={freeSpins}
-        multiplier={multiplier}
-        rank={rank}
-      />
-      <Lootbox
-        onSpin={handleSpin}
-        isSpinning={isSpinning}
-        freeSpins={freeSpins}
-        spinCost={spinCost}
-      />
-      <ResultModal result={result} onClose={() => setResult(null)} />
-      <footer>Metin2 Treasure Rush © 2025 - Symulator Skrzynek</footer>
-    </div>
-  );
-}
-
-export default GamePage; */}
-
+import Inventory from "../components/Inventory";
 
 function GamePage() {
   const [balance, setBalance] = useState(1000);
@@ -118,133 +16,301 @@ function GamePage() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [items, setItems] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [equippedItems, setEquippedItems] = useState([]);
+  const [showInventory, setShowInventory] = useState(false);
   const spinCost = 100;
 
-{/*   const items = [
-    { id: 1, name: "Miecz Smogorożca", img: "/api/placeholder/60/60", rarity: "legendary", chance: 5, value: 5000 },
-    { id: 2, name: "Zbroja Niebieskiego Smoka", img: "/api/placeholder/60/60", rarity: "epic", chance: 10, value: 2000 },
-    { id: 3, name: "Miecz Czerwonego Smoka", img: "/api/placeholder/60/60", rarity: "epic", chance: 10, value: 1800 },
-    { id: 4, name: "Łuk Fenixa", img: "/api/placeholder/60/60", rarity: "rare", chance: 15, value: 1000 },
-    { id: 5, name: "Hełm Mściciela", img: "/api/placeholder/60/60", rarity: "rare", chance: 15, value: 800 },
-    { id: 6, name: "Naszyjnik Żmii", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 20, value: 400 },
-    { id: 7, name: "Buty Wędrowca", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 20, value: 300 },
-    { id: 8, name: "Żelazny Miecz", img: "/api/placeholder/60/60", rarity: "common", chance: 25, value: 100 },
-    { id: 9, name: "Skórzany Hełm", img: "/api/placeholder/60/60", rarity: "common", chance: 30, value: 50 },
-    { id: 10, name: "Zardzewiała Zbroja", img: "/api/placeholder/60/60", rarity: "common", chance: 50, value: 20 },
-    { id: 11, name: "Miecz Duszy", img: "/api/placeholder/60/60", rarity: "legendary", chance: 4, value: 5200 },
-    { id: 12, name: "Zbroja Cienia", img: "/api/placeholder/60/60", rarity: "legendary", chance: 5, value: 4800 },
-    { id: 13, name: "Pierścień Króla Demonów", img: "/api/placeholder/60/60", rarity: "legendary", chance: 5, value: 5000 },
-    { id: 14, name: "Szpony Bestii", img: "/api/placeholder/60/60", rarity: "epic", chance: 8, value: 2200 },
-    { id: 15, name: "Hełm Czerwonej Krwi", img: "/api/placeholder/60/60", rarity: "epic", chance: 9, value: 2100 },
-    { id: 16, name: "Tarcza Smoczego Oka", img: "/api/placeholder/60/60", rarity: "epic", chance: 10, value: 2000 },
-    { id: 17, name: "Zbroja Złotego Wilka", img: "/api/placeholder/60/60", rarity: "rare", chance: 13, value: 1200 },
-    { id: 18, name: "Miecz Płomienia", img: "/api/placeholder/60/60", rarity: "rare", chance: 15, value: 1100 },
-    { id: 19, name: "Amulet Przeznaczenia", img: "/api/placeholder/60/60", rarity: "rare", chance: 14, value: 1000 },
-    { id: 20, name: "Buty Cienia", img: "/api/placeholder/60/60", rarity: "rare", chance: 15, value: 900 },
-    { id: 21, name: "Szata Mędrca", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 18, value: 600 },
-    { id: 22, name: "Rękawice Zwinności", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 20, value: 500 },
-    { id: 23, name: "Bransoleta Ognia", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 19, value: 450 },
-    { id: 24, name: "Kolczuga Strażnika", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 21, value: 470 },
-    { id: 25, name: "Pas Wojownika", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 20, value: 400 },
-    { id: 26, name: "Sztylet Złodzieja", img: "/api/placeholder/60/60", rarity: "common", chance: 25, value: 150 },
-    { id: 27, name: "Pierścień Odporności", img: "/api/placeholder/60/60", rarity: "common", chance: 30, value: 100 },
-    { id: 28, name: "Kaptur Zwiadowcy", img: "/api/placeholder/60/60", rarity: "common", chance: 28, value: 90 },
-    { id: 29, name: "Skórzana Kamizelka", img: "/api/placeholder/60/60", rarity: "common", chance: 35, value: 80 },
-    { id: 30, name: "Stary Łuk", img: "/api/placeholder/60/60", rarity: "common", chance: 40, value: 70 },
-    { id: 31, name: "Miecz Półksiężyca", img: "/api/placeholder/60/60", rarity: "epic", chance: 9, value: 1900 },
-    { id: 32, name: "Zbroja Nocnego Wędrowca", img: "/api/placeholder/60/60", rarity: "epic", chance: 10, value: 1850 },
-    { id: 33, name: "Hełm Lotosu", img: "/api/placeholder/60/60", rarity: "rare", chance: 14, value: 950 },
-    { id: 34, name: "Bransoleta Księżyca", img: "/api/placeholder/60/60", rarity: "rare", chance: 15, value: 800 },
-    { id: 35, name: "Kolczuga Weterana", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 20, value: 350 },
-    { id: 36, name: "Amulet Czystości", img: "/api/placeholder/60/60", rarity: "uncommon", chance: 20, value: 300 },
-    { id: 37, name: "Hełm Rybaka", img: "/api/placeholder/60/60", rarity: "common", chance: 30, value: 60 },
-    { id: 38, name: "Skórzane Rękawice", img: "/api/placeholder/60/60", rarity: "common", chance: 35, value: 50 },
-    { id: 39, name: "Złamana Włócznia", img: "/api/placeholder/60/60", rarity: "common", chance: 45, value: 30 },
-    { id: 40, name: "Zbutwiałe Buty", img: "/api/placeholder/60/60", rarity: "common", chance: 50, value: 20 }
-  ]; */}
-
-// Pobieranie itemow z firebase
-useEffect(() => {
-  const fetchItems = async () => {
+  // Pobieranie itemów z firebase
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "items"));
+        const itemList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setItems(itemList);
+      } catch (error) {
+        console.error("Błąd pobierania przedmiotów:", error);
+        // Ustaw przedmioty domyślne jeśli firebase nie zadziała
+        setItems([
+          { id: 1, name: "Miecz Smogorożca", img: "/api/placeholder/60/60", rarity: "legendary", chance: 5, value: 5000 },
+          { id: 2, name: "Zbroja Niebieskiego Smoka", img: "/api/placeholder/60/60", rarity: "epic", chance: 10, value: 2000 },
+          // ...inne przedmioty
+        ]);
+      }
+    };
+  
+    fetchItems();
+    
+    // Pobierz zapisany ekwipunek z lokalnego storage
     try {
-      const querySnapshot = await getDocs(collection(db, "items"));
-      const itemList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setItems(itemList);
+      const savedInventory = localStorage.getItem('metin2-inventory');
+      if (savedInventory) {
+        setInventory(JSON.parse(savedInventory));
+        console.log("Załadowano ekwipunek z localStorage:", JSON.parse(savedInventory));
+      }
+      
+      const savedEquipped = localStorage.getItem('metin2-equipped');
+      if (savedEquipped) {
+        setEquippedItems(JSON.parse(savedEquipped));
+      }
+      
+      const savedBalance = localStorage.getItem('metin2-balance');
+      if (savedBalance) {
+        setBalance(parseInt(savedBalance));
+      }
     } catch (error) {
-      console.error("Błąd pobierania przedmiotów:", error);
+      console.error("Błąd ładowania danych z localStorage:", error);
+      // Możesz zresetować localStorage jeśli dane są uszkodzone
+      localStorage.removeItem('metin2-inventory');
+      localStorage.removeItem('metin2-equipped');
     }
+  }, []);
+  // Zapisuj ekwipunek do localStorage przy każdej zmianie
+  useEffect(() => {
+    // Zapisuj tylko gdy inventory zawiera elementy lub jest pustą tablicą po sprzedaży
+    localStorage.setItem('metin2-inventory', JSON.stringify(inventory));
+  }, [inventory]);
+  
+  // Zapisuj założone przedmioty do localStorage
+  useEffect(() => {
+    if (equippedItems.length > 0) {
+      localStorage.setItem('metin2-equipped', JSON.stringify(equippedItems));
+    }
+  }, [equippedItems]);
+  
+  // Zapisuj balans do localStorage
+  useEffect(() => {
+    localStorage.setItem('metin2-balance', balance.toString());
+  }, [balance]);
+
+  const handleLogout = () => {
+    alert("Wylogowanie wyłączone w trybie offline");
   };
 
-  fetchItems();
-}, []);
+  const handleSpin = () => {
+    if (isSpinning || (!freeSpins && balance < spinCost) || items.length === 0) return;
 
-const handleLogout = () => {
-  alert("Wylogowanie wyłączone w trybie offline");
-};
+    if (freeSpins > 0) {
+      setFreeSpins(freeSpins - 1);
+    } else {
+      setBalance(balance - spinCost);
+    }
 
-const handleSpin = () => {
-  if (isSpinning || (!freeSpins && balance < spinCost) || items.length === 0) return;
+    navigator.vibrate?.([100, 50, 100]);
 
-  if (freeSpins > 0) {
-    setFreeSpins(freeSpins - 1);
-  } else {
-    setBalance(balance - spinCost);
-  }
+    // Losowanie przedmiotu wg szans
+    const totalWeight = items.reduce((sum, item) => sum + item.chance, 0);
+    const roll = Math.random() * totalWeight;
+    let cumulative = 0;
+    let rolledItem = items[0];
 
-  navigator.vibrate?.([100, 50, 100]);
+    for (let i = 0; i < items.length; i++) {
+      cumulative += items[i].chance;
+      if (roll <= cumulative) {
+        rolledItem = items[i];
+        break;
+      }
+    }
 
-  // Losowanie przedmiotu wg szans
-  const totalWeight = items.reduce((sum, item) => sum + item.chance, 0);
-  const roll = Math.random() * totalWeight;
-  let cumulative = 0;
-  let rolledItem = items[0];
+    setSelectedItem(rolledItem);
+    setIsSpinning(true);
+  };
 
-  for (let i = 0; i < items.length; i++) {
-    cumulative += items[i].chance;
-    if (roll <= cumulative) {
-      rolledItem = items[i];
-      break;
+  const handleSpinComplete = (item) => {
+    const newBalance = balance + Math.floor(item.value * multiplier);
+    setBalance(newBalance);
+    setMultiplier((prev) => Math.min(5.0, Math.round((prev + 0.5) * 10) / 10));
+    setRank("Legenda");
+    setIsSpinning(false);
+    setResult(item);
+    
+    // Dodaj przedmiot do ekwipunku
+    const newItem = {
+      ...item,
+      inventoryId: Date.now(), // unikalny identyfikator dla tego konkretnego egzemplarza przedmiotu
+      obtainedAt: new Date().toISOString()
+    };
+    
+    setInventory(prev => [...prev, newItem]);
+  };
+  
+  // Funkcja do sprzedawania przedmiotów
+// Modyfikacja funkcji handleSellItem w GamePage.jsx
+
+// Funkcja do sprzedawania przedmiotów
+const handleSellItem = (item) => {
+  if (window.confirm(`Czy na pewno chcesz sprzedać ${item.name} za ${item.value} Yang?`)) {
+    // Aktualizacja stanu inventory
+    const updatedInventory = inventory.filter(i => i.inventoryId !== item.inventoryId);
+    setInventory(updatedInventory);
+    
+    // Natychmiastowe zapisanie do localStorage
+    localStorage.setItem('metin2-inventory', JSON.stringify(updatedInventory));
+    
+    // Aktualizacja stanu balance
+    const newBalance = balance + item.value;
+    setBalance(newBalance);
+    
+    // Natychmiastowe zapisanie do localStorage
+    localStorage.setItem('metin2-balance', newBalance.toString());
+    
+    // Jeśli przedmiot był założony, usuń go z listy założonych
+    if (equippedItems.some(i => i.inventoryId === item.inventoryId)) {
+      const updatedEquipped = equippedItems.filter(i => i.inventoryId !== item.inventoryId);
+      setEquippedItems(updatedEquipped);
+      
+      // Natychmiastowe zapisanie do localStorage
+      localStorage.setItem('metin2-equipped', JSON.stringify(updatedEquipped));
     }
   }
-
-  setSelectedItem(rolledItem);
-  setIsSpinning(true);
 };
+  
+  // Funkcja do zakładania przedmiotów
+  const handleEquipItem = (item) => {
+    // Sprawdź typ przedmiotu i czy nie ma już założonego przedmiotu tego typu
+    let itemType = "misc";
+    if (item.name.toLowerCase().includes("miecz") || 
+        item.name.toLowerCase().includes("sztylet") ||
+        item.name.toLowerCase().includes("łuk")) {
+      itemType = "weapon";
+    } else if (item.name.toLowerCase().includes("zbroja") ||
+              item.name.toLowerCase().includes("kolczuga")) {
+      itemType = "chest";
+    } else if (item.name.toLowerCase().includes("hełm")) {
+      itemType = "head";
+    } else if (item.name.toLowerCase().includes("buty")) {
+      itemType = "feet";
+    } else if (item.name.toLowerCase().includes("pierścień") ||
+              item.name.toLowerCase().includes("naszyjnik") ||
+              item.name.toLowerCase().includes("amulet")) {
+      itemType = "accessory";
+    }
+    
+    // Sprawdź czy podobny przedmiot jest już założony
+    const existingEquipped = equippedItems.find(i => 
+      getItemType(i.name) === itemType && itemType !== "accessory"
+    );
+    
+    if (existingEquipped) {
+      if (window.confirm(`Masz już założony przedmiot tego typu (${existingEquipped.name}). Czy chcesz go zamienić?`)) {
+        // Usuń stary przedmiot i dodaj nowy
+        setEquippedItems(prev => [...prev.filter(i => i.inventoryId !== existingEquipped.inventoryId), item]);
+      }
+    } else {
+      // Po prostu dodaj przedmiot do ekwipowanych
+      setEquippedItems(prev => [...prev, item]);
+      alert(`Założono: ${item.name}`);
+    }
+  };
+  
+  // Pomocnicza funkcja do określenia typu przedmiotu
+  function getItemType(name) {
+    name = name.toLowerCase();
+    if (name.includes("miecz") || name.includes("sztylet") || name.includes("łuk")) return "weapon";
+    if (name.includes("zbroja") || name.includes("kolczuga")) return "chest";
+    if (name.includes("hełm")) return "head";
+    if (name.includes("buty")) return "feet";
+    if (name.includes("pierścień") || name.includes("naszyjnik") || name.includes("amulet")) return "accessory";
+    return "misc";
+  }
+  
+  // Przełączanie widoku ekwipunku
+  const toggleInventory = () => {
+    setShowInventory(prev => !prev);
+  };
 
-const handleSpinComplete = (item) => {
-  const newBalance = balance + Math.floor(item.value * multiplier);
-  setBalance(newBalance);
-  setMultiplier((prev) => Math.min(5.0, Math.round((prev + 0.5) * 10) / 10));
-  setRank("Legenda");
-  setIsSpinning(false);
-  setResult(item);
-};
-
-return (
-  <div className="app-container">
-    <Header onLogout={handleLogout} />
-    <StatsBar
-      balance={balance}
-      freeSpins={freeSpins}
-      multiplier={multiplier}
-      rank={rank}
-    />
-    <Lootbox
-      items={items}
-      selectedItem={selectedItem}
-      onSpin={handleSpin}
-      isSpinning={isSpinning}
-      freeSpins={freeSpins}
-      spinCost={spinCost}
-      onSpinComplete={handleSpinComplete}
-    />
-    <ResultModal result={result} onClose={() => setResult(null)} />
-    <footer>Metin2 Treasure Rush © 2025 - Symulator Skrzynek</footer>
-  </div>
-);
+  return (
+    <div className="app-container">
+      <Header onLogout={handleLogout} />
+      <StatsBar
+        balance={balance}
+        freeSpins={freeSpins}
+        multiplier={multiplier}
+        rank={rank}
+      />
+      
+      {/* Przyciski nawigacyjne */}
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "center", 
+        gap: "15px", 
+        margin: "20px 0" 
+      }}>
+        <button 
+          onClick={() => setShowInventory(false)}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: !showInventory ? "#f8d64e" : "#2c2f33",
+            color: !showInventory ? "#000" : "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+        >
+          Losowanie
+        </button>
+        <button 
+          onClick={() => setShowInventory(true)}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: showInventory ? "#f8d64e" : "#2c2f33",
+            color: showInventory ? "#000" : "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            position: "relative"
+          }}
+        >
+          Inventory
+          {inventory.length > 0 && (
+            <span style={{
+              position: "absolute",
+              top: "-5px",
+              right: "-5px",
+              backgroundColor: "#f44336",
+              color: "white",
+              borderRadius: "50%",
+              width: "20px",
+              height: "20px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              fontSize: "12px"
+            }}>
+              {inventory.length}
+            </span>
+          )}
+        </button>
+      </div>
+      
+      {/* Wyświetl albo losowanie albo ekwipunek */}
+      {!showInventory ? (
+        <Lootbox
+          items={items}
+          selectedItem={selectedItem}
+          onSpin={handleSpin}
+          isSpinning={isSpinning}
+          freeSpins={freeSpins}
+          spinCost={spinCost}
+          onSpinComplete={handleSpinComplete}
+        />
+      ) : (
+        <Inventory 
+          inventory={inventory} 
+          onSell={handleSellItem}
+          onEquip={handleEquipItem}
+        />
+      )}
+      
+      <ResultModal result={result} onClose={() => setResult(null)} />
+      <footer>Metin2 Treasure Rush © 2025 - Symulator Skrzynek</footer>
+    </div>
+  );
 }
 
 export default GamePage;

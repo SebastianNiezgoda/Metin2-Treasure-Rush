@@ -221,3 +221,49 @@
     pointer-events: none;
   }
   
+/* Style dla komponentu Ekwipunek */
+.inventory-container {
+  margin-top: 2rem;
+}
+
+.inventory-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inventory-grid::-webkit-scrollbar-track {
+  background: #1e2023;
+  border-radius: 4px;
+}
+
+.inventory-grid::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.inventory-grid::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+.inventory-item {
+  transform: scale(1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.inventory-item:hover {
+  transform: scale(1.05);
+  z-index: 5;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.inventory-item.selected {
+  transform: scale(1.05);
+  z-index: 5;
+}
+
+.item-actions button {
+  transition: background-color 0.2s ease;
+}
+
+.item-actions button:hover {
+  filter: brightness(1.2);
+}

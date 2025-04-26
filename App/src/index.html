@@ -5,12 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#321c0c" />
     <meta name="description" content="Metin2 Treasure Rush - mobilna gra lootbox PWA" />
-    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Favicon i ikony PWA -->
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/icon-512.png" />
+    
+    <!-- Tytuł aplikacji -->
     <title>Metin2 Treasure Rush</title>
+    
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Skrypt geolokalizacji -->
     <script>
-      // Detekcja lokalizacji i potwierdzenie kraju
       window.addEventListener("load", () => {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(async (position) => {
@@ -19,27 +26,29 @@
             try {
               const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
               const data = await res.json();
-              const country = data.address.country;
+              const country = data.address?.country;
               if (country) {
                 const confirmed = confirm(`Wykryto Twój kraj: ${country}. Czy to się zgadza?`);
                 if (!confirmed) {
-                  alert("Kraj nie został potwierdzony – niektóre funkcje mogą być ograniczone.");
+                  alert("Kraj nie został potwierdzone – niektóre funkcje mogą być ograniczone.");
                 } else {
                   localStorage.setItem("confirmedCountry", country);
                 }
               }
             } catch (e) {
-              console.error("Nie udało się pobrać kraju:", e);
+              console.error("Błąd geolokalizacji:", e);
             }
           }, (err) => {
-            console.warn("Użytkownik odmówił geolokalizacji", err);
+            console.warn("Brak dostępu do geolokalizacji", err);
           });
         }
       });
     </script>
   </head>
   <body>
-    <noscript>Musisz włączyć JavaScript, aby uruchomić tę aplikację.</noscript>
+    <noscript>Włącz JavaScript aby korzystać z aplikacji</noscript>
     <div id="root"></div>
+    
+    <!-- Vite będzie automatycznie wstrzykiwał skrypty tutaj -->
   </body>
 </html>

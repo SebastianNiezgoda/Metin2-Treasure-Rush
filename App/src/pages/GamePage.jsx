@@ -175,14 +175,7 @@ const handleSellItem = (item) => {
     // zapisanie do localStorage
     localStorage.setItem('metin2-balance', newBalance.toString());
     
-    // Jeśli przedmiot był założony, usuń go z listy założonych
-    if (equippedItems.some(i => i.inventoryId === item.inventoryId)) {
-      const updatedEquipped = equippedItems.filter(i => i.inventoryId !== item.inventoryId);
-      setEquippedItems(updatedEquipped);
-      
-      // Natychmiastowe zapisanie do localStorage
-      localStorage.setItem('metin2-equipped', JSON.stringify(updatedEquipped));
-    }
+    
   }
 };
   

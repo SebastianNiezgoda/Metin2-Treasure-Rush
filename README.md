@@ -14,4 +14,4 @@ If you are developing a production application, we recommend using TypeScript an
 
 ## Link to the prototype in Marvel
 
-[Prototype]https://github.com/SebastianNiezgoda/Metin2-Treasure-Rush.git
+[Prototype]https://marvelapp.com/prototype/72dh1ib/screen/97132217

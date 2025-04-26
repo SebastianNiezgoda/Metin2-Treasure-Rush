@@ -18,8 +18,8 @@ function Lootbox({ items, onSpin, isSpinning, freeSpins, spinCost, onSpinComplet
   const [finalItem, setFinalItem] = useState(null);
 
   const spinSequence = [
-    80, 90, 100, 110, 120, 130, 140, 150,
-    170, 190, 220, 250, 300, 350, 400, 500,
+    220, 230, 240, 250, 260, 270, 280, 300,
+    310, 320, 330, 340, 350, 350, 400, 500,
     600
   ];
   // funkcja do odtwarzania dzwieku w zalezcnosci od rzadkosci

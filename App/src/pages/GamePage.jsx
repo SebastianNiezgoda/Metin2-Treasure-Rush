@@ -6,8 +6,11 @@ import StatsBar from "../components/StatsBar";
 import Lootbox from "../components/Lootbox";
 import ResultModal from "../components/ResultModal";
 import Inventory from "../components/Inventory";
+import RankPopover from "../components/RankPopover";
+
 
 function GamePage() {
+  const [ranks, setRanks] = useState([]);
   const [balance, setBalance] = useState(1000);
   const [freeSpins, setFreeSpins] = useState(0);
   const [rank, setRank] = useState("Początkujący");
@@ -18,9 +21,18 @@ function GamePage() {
   const [inventory, setInventory] = useState([]);
   const [equippedItems, setEquippedItems] = useState([]);
   const [showInventory, setShowInventory] = useState(false);
+  const [showRankInfo, setShowRankInfo] = useState(false);
+
+
   const spinCost = 100;
 
-  // Pobieranie itemów z firebase
+  const currentRankDescription = ranks.find(r => r.name === rank)?.description || "";
+  const nextRank = ranks
+  .filter(r => r.minBalance > balance)
+  .sort((a, b) => a.minBalance - b.minBalance)[0] || null;
+
+
+  // Ładowanie przedmiotów i localStorage
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -31,56 +43,61 @@ function GamePage() {
         }));
         setItems(itemList);
       } catch (error) {
-        console.error("Nie można pobrać itemów z bazy danych, sprawdź swoje połączenie i spróboj ponownie", error);
-        
+        console.error("Błąd pobierania itemów:", error);
       }
     };
-  
+
     fetchItems();
-    
-    // Pobierz zapisany ekwipunek z lokalnego storage
+
+    // Wczytaj dane z localStorage
     try {
-      const savedInventory = localStorage.getItem('metin2-inventory');
-      if (savedInventory) {
-        setInventory(JSON.parse(savedInventory));
-        console.log("Załadowano ekwipunek z localStorage:", JSON.parse(savedInventory));
-      }
-      
-      const savedEquipped = localStorage.getItem('metin2-equipped');
-      if (savedEquipped) {
-        setEquippedItems(JSON.parse(savedEquipped));
-      }
-      
-      const savedBalance = localStorage.getItem('metin2-balance');
-      if (savedBalance) {
-        setBalance(parseInt(savedBalance));
-      }
+      const savedInventory = localStorage.getItem("metin2-inventory");
+      if (savedInventory) setInventory(JSON.parse(savedInventory));
+
+      const savedEquipped = localStorage.getItem("metin2-equipped");
+      if (savedEquipped) setEquippedItems(JSON.parse(savedEquipped));
+
+      const savedBalance = localStorage.getItem("metin2-balance");
+      if (savedBalance) setBalance(parseInt(savedBalance, 10));
     } catch (error) {
-      console.error("Błąd ładowania danych z localStorage:", error);
-      // Możesz zresetować localStorage jeśli dane są uszkodzone
+      console.error("Błąd ładowania localStorage:", error);
       localStorage.removeItem('metin2-inventory');
       localStorage.removeItem('metin2-equipped');
     }
- 
+
     setFreeSpins(prev => prev + 2);
   }, []);
 
-
-  
-  // Zapisuj ekwipunek do localStorage przy każdej zmianie
+  // Ładowanie rang z Firebase
   useEffect(() => {
-    // Zapisuj tylko gdy inventory zawiera elementy lub jest pustą tablicą po sprzedaży
+    const fetchRanks = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Ranking"));
+        const rankList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        const sortedRanks = rankList.sort((a, b) => b.minBalance - a.minBalance);
+        setRanks(sortedRanks);
+      } catch (error) {
+        console.error("Błąd pobierania rang:", error);
+      }
+    };
+
+    fetchRanks();
+  }, []);
+
+  // Zapisywanie do localStorage
+  useEffect(() => {
     localStorage.setItem('metin2-inventory', JSON.stringify(inventory));
   }, [inventory]);
-  
-  // Zapisuj założone przedmioty do localStorage
+
   useEffect(() => {
     if (equippedItems.length > 0) {
       localStorage.setItem('metin2-equipped', JSON.stringify(equippedItems));
     }
   }, [equippedItems]);
-  
-  // Zapisuj balans do localStorage
+
   useEffect(() => {
     localStorage.setItem('metin2-balance', balance.toString());
   }, [balance]);
@@ -93,14 +110,13 @@ function GamePage() {
     if (isSpinning || (!freeSpins && balance < spinCost) || items.length === 0) return;
 
     if (freeSpins > 0) {
-      setFreeSpins(freeSpins - 1);
+      setFreeSpins(prev => prev - 1);
     } else {
-      setBalance(balance - spinCost);
+      setBalance(prev => prev - spinCost);
     }
 
     navigator.vibrate?.([100, 50, 100]);
 
-    // Losowanie przedmiotu wg szans
     const totalWeight = items.reduce((sum, item) => sum + item.chance, 0);
     const roll = Math.random() * totalWeight;
     let cumulative = 0;
@@ -121,79 +137,42 @@ function GamePage() {
   const handleSpinComplete = (item) => {
     setIsSpinning(false);
     setResult(item);
-    
-    
-    // Dodaj przedmiot do ekwipunku
+
     const newItem = {
       ...item,
-      inventoryId: Date.now(), // unikalny identyfikator dla tego konkretnego egzemplarza przedmiotu
+      inventoryId: Date.now(),
       obtainedAt: new Date().toISOString()
     };
-    
+
     setInventory(prev => [...prev, newItem]);
   };
 
-  //funkcja do upateowania rangi
   const updateRank = (currentBalance) => {
-    let newRank = "Początkujący";
-  
-    if (currentBalance >= 20000) {
-      newRank = "Legenda";
-    } else if (currentBalance >= 15000) {
-      newRank = "Mistrz";
-    } else if (currentBalance >= 5000) {
-      newRank = "Weteran";
-    } else if (currentBalance >= 2000) {
-      newRank = "Wojownik";
-    }
-  
-    if (newRank !== rank) {
-      setRank(newRank);
+    if (ranks.length === 0) return;
+
+    const foundRank = ranks.find(r => currentBalance >= r.minBalance) || { name: "Początkujący", description: "" };
+
+    if (foundRank.name !== rank) {
+      setRank(foundRank.name);
       setFreeSpins(prev => prev + 2);
-      alert(`Awansowałeś na rangę: ${newRank}! Otrzymujesz 2 darmowe spiny!`);
+      alert(`Awansowałeś na rangę: ${foundRank.name}! Otrzymujesz 2 darmowe spiny!`);
     }
   };
-  
-  // Funkcja do sprzedawania przedmiotów
 
+  const handleSellItem = (item) => {
+    if (window.confirm(`Czy na pewno chcesz sprzedać ${item.name} za ${item.value} Yang?`)) {
+      const updatedInventory = inventory.filter(i => i.inventoryId !== item.inventoryId);
+      setInventory(updatedInventory);
 
-// Funkcja do sprzedawania przedmiotów
-const handleSellItem = (item) => {
-  if (window.confirm(`Czy na pewno chcesz sprzedać ${item.name} za ${item.value} Yang?`)) {
-    // Aktualizacja stanu inventory
-    const updatedInventory = inventory.filter(i => i.inventoryId !== item.inventoryId);
-    setInventory(updatedInventory);
-    
-    // Natychmiastowe zapisanie do localStorage
-    localStorage.setItem('metin2-inventory', JSON.stringify(updatedInventory));
-    
-    // Aktualizacja stanu balance
-    const newBalance = balance + item.value;
-    setBalance(newBalance);
-    updateRank(newBalance);
-    
-    // zapisanie do localStorage
-    localStorage.setItem('metin2-balance', newBalance.toString());
-    
-    
-  }
-};
-  
-  // Funkcja do zakładania przedmiotów
-  
-  
-  // Pomocnicza funkcja do określenia typu przedmiotu
-  function getItemType(name) {
-    name = name.toLowerCase();
-    if (name.includes("miecz") || name.includes("sztylet") || name.includes("łuk")) return "weapon";
-    if (name.includes("zbroja") || name.includes("kolczuga")) return "chest";
-    if (name.includes("hełm")) return "head";
-    if (name.includes("buty")) return "feet";
-    if (name.includes("pierścień") || name.includes("naszyjnik") || name.includes("amulet")) return "accessory";
-    return "misc";
-  }
-  
-  // Przełączanie widoku ekwipunku
+      const newBalance = balance + item.value;
+      setBalance(newBalance);
+      updateRank(newBalance);
+
+      localStorage.setItem('metin2-inventory', JSON.stringify(updatedInventory));
+      localStorage.setItem('metin2-balance', newBalance.toString());
+    }
+  };
+
   const toggleInventory = () => {
     setShowInventory(prev => !prev);
   };
@@ -205,16 +184,25 @@ const handleSellItem = (item) => {
         balance={balance}
         freeSpins={freeSpins}
         rank={rank}
+        onRankClick={() => setShowRankInfo(true)}
       />
-      
-      {/* Przyciski nawigacyjne */}
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "center", 
-        gap: "15px", 
-        margin: "20px 0" 
+{showRankInfo && (
+      <RankPopover
+        rankName={rank}
+        rankDescription={currentRankDescription}
+        nextRankName={nextRank?.name}
+        pointsToNext={nextRank ? nextRank.minBalance - balance : 0}
+        onClose={() => setShowRankInfo(false)}
+      />
+    )}
+
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        gap: "15px",
+        margin: "20px 0"
       }}>
-        <button 
+        <button
           onClick={() => setShowInventory(false)}
           style={{
             padding: "10px 20px",
@@ -228,7 +216,7 @@ const handleSellItem = (item) => {
         >
           Losowanie
         </button>
-        <button 
+        <button
           onClick={() => setShowInventory(true)}
           style={{
             padding: "10px 20px",
@@ -237,8 +225,8 @@ const handleSellItem = (item) => {
             border: "none",
             borderRadius: "5px",
             cursor: "pointer",
-            fontWeight: "bold",
-            position: "relative"
+            position: "relative",
+            fontWeight: "bold"
           }}
         >
           Inventory
@@ -262,8 +250,7 @@ const handleSellItem = (item) => {
           )}
         </button>
       </div>
-      
-      {/* Wyświetl albo losowanie albo ekwipunek */}
+
       {!showInventory ? (
         <Lootbox
           items={items}
@@ -275,13 +262,12 @@ const handleSellItem = (item) => {
           onSpinComplete={handleSpinComplete}
         />
       ) : (
-        <Inventory 
-          inventory={inventory} 
+        <Inventory
+          inventory={inventory}
           onSell={handleSellItem}
-          
         />
       )}
-      
+
       <ResultModal result={result} onClose={() => setResult(null)} />
       <footer>Metin2 Treasure Rush © 2025 - Symulator Skrzynek</footer>
     </div>
@@ -289,3 +275,4 @@ const handleSellItem = (item) => {
 }
 
 export default GamePage;
+GamePage.jsx

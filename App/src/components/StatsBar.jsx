@@ -12,10 +12,6 @@ function StatsBar({ balance, freeSpins, multiplier, rank }) {
         <div className="stat-value">{freeSpins}</div>
       </div>
       <div className="stat">
-        <div className="stat-label">Mnożnik</div>
-        <div className="stat-value">x{multiplier.toFixed(1)}</div>
-      </div>
-      <div className="stat">
         <div className="stat-label">Ranking</div>
         <div className="stat-value">{rank}</div>
       </div>

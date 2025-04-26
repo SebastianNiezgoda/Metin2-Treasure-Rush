@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 const clickAudio = new Audio("/assets/sounds/click.mp3");
 
+
+const raritySounds = {
+  common: new Audio("assets/sounds/common.mp3"),
+  uncommon: new Audio("assets/sounds/uncommon.mp3"),
+  rare: new Audio("assets/sounds/rare.mp3"),
+  epic: new Audio("assets/sounds/epic.mp3"),
+  legendary: new Audio("assets/sounds/legendary.mp3")
+};
+
 function Lootbox({ items, onSpin, isSpinning, freeSpins, spinCost, onSpinComplete }) {
   const [displayItem, setDisplayItem] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
@@ -13,6 +22,16 @@ function Lootbox({ items, onSpin, isSpinning, freeSpins, spinCost, onSpinComplet
     170, 190, 220, 250, 300, 350, 400, 500,
     600
   ];
+  // funkcja do odtwarzania dzwieku w zalezcnosci od rzadkosci
+  const playRaritySound = (item) => {
+    let rarity = item.rarity ; 
+  
+    const sound = raritySounds[rarity];
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play();
+    }
+  };
 
   const handleSpin = () => {
     if (isSpinning || isAnimating) return;
@@ -47,6 +66,9 @@ function Lootbox({ items, onSpin, isSpinning, freeSpins, spinCost, onSpinComplet
       // Zakończ losowanie i pokaż wynik
       setDisplayItem(finalItem);
       setTimeout(() => {
+        if (finalItem) {
+          playRaritySound(finalItem);
+        }
         onSpinComplete(finalItem);
         setIsAnimating(false);
         setFinalItem(null);

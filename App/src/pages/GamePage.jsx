@@ -10,7 +10,6 @@ import Inventory from "../components/Inventory";
 function GamePage() {
   const [balance, setBalance] = useState(1000);
   const [freeSpins, setFreeSpins] = useState(0);
-  const [multiplier, setMultiplier] = useState(1.0);
   const [rank, setRank] = useState("Początkujący");
   const [result, setResult] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -62,7 +61,12 @@ function GamePage() {
       localStorage.removeItem('metin2-inventory');
       localStorage.removeItem('metin2-equipped');
     }
+ 
+    setFreeSpins(prev => prev + 2);
   }, []);
+
+
+  
   // Zapisuj ekwipunek do localStorage przy każdej zmianie
   useEffect(() => {
     // Zapisuj tylko gdy inventory zawiera elementy lub jest pustą tablicą po sprzedaży
@@ -115,12 +119,9 @@ function GamePage() {
   };
 
   const handleSpinComplete = (item) => {
-    const newBalance = balance + Math.floor(item.value * multiplier);
-    setBalance(newBalance);
-    setMultiplier((prev) => Math.min(5.0, Math.round((prev + 0.5) * 10) / 10));
-    setRank("Legenda");
     setIsSpinning(false);
     setResult(item);
+    
     
     // Dodaj przedmiot do ekwipunku
     const newItem = {
@@ -131,9 +132,30 @@ function GamePage() {
     
     setInventory(prev => [...prev, newItem]);
   };
+
+  //funkcja do upateowania rangi
+  const updateRank = (currentBalance) => {
+    let newRank = "Początkujący";
+  
+    if (currentBalance >= 20000) {
+      newRank = "Legenda";
+    } else if (currentBalance >= 15000) {
+      newRank = "Mistrz";
+    } else if (currentBalance >= 5000) {
+      newRank = "Weteran";
+    } else if (currentBalance >= 2000) {
+      newRank = "Wojownik";
+    }
+  
+    if (newRank !== rank) {
+      setRank(newRank);
+      setFreeSpins(prev => prev + 2);
+      alert(`Awansowałeś na rangę: ${newRank}! Otrzymujesz 2 darmowe spiny!`);
+    }
+  };
   
   // Funkcja do sprzedawania przedmiotów
-// Modyfikacja funkcji handleSellItem w GamePage.jsx
+
 
 // Funkcja do sprzedawania przedmiotów
 const handleSellItem = (item) => {
@@ -148,8 +170,9 @@ const handleSellItem = (item) => {
     // Aktualizacja stanu balance
     const newBalance = balance + item.value;
     setBalance(newBalance);
+    updateRank(newBalance);
     
-    // Natychmiastowe zapisanie do localStorage
+    // zapisanie do localStorage
     localStorage.setItem('metin2-balance', newBalance.toString());
     
     // Jeśli przedmiot był założony, usuń go z listy założonych
@@ -164,42 +187,7 @@ const handleSellItem = (item) => {
 };
   
   // Funkcja do zakładania przedmiotów
-  const handleEquipItem = (item) => {
-    // Sprawdź typ przedmiotu i czy nie ma już założonego przedmiotu tego typu
-    let itemType = "misc";
-    if (item.name.toLowerCase().includes("miecz") || 
-        item.name.toLowerCase().includes("sztylet") ||
-        item.name.toLowerCase().includes("łuk")) {
-      itemType = "weapon";
-    } else if (item.name.toLowerCase().includes("zbroja") ||
-              item.name.toLowerCase().includes("kolczuga")) {
-      itemType = "chest";
-    } else if (item.name.toLowerCase().includes("hełm")) {
-      itemType = "head";
-    } else if (item.name.toLowerCase().includes("buty")) {
-      itemType = "feet";
-    } else if (item.name.toLowerCase().includes("pierścień") ||
-              item.name.toLowerCase().includes("naszyjnik") ||
-              item.name.toLowerCase().includes("amulet")) {
-      itemType = "accessory";
-    }
-    
-    // Sprawdź czy podobny przedmiot jest już założony
-    const existingEquipped = equippedItems.find(i => 
-      getItemType(i.name) === itemType && itemType !== "accessory"
-    );
-    
-    if (existingEquipped) {
-      if (window.confirm(`Masz już założony przedmiot tego typu (${existingEquipped.name}). Czy chcesz go zamienić?`)) {
-        // Usuń stary przedmiot i dodaj nowy
-        setEquippedItems(prev => [...prev.filter(i => i.inventoryId !== existingEquipped.inventoryId), item]);
-      }
-    } else {
-      // Po prostu dodaj przedmiot do ekwipowanych
-      setEquippedItems(prev => [...prev, item]);
-      alert(`Założono: ${item.name}`);
-    }
-  };
+  
   
   // Pomocnicza funkcja do określenia typu przedmiotu
   function getItemType(name) {
@@ -223,7 +211,6 @@ const handleSellItem = (item) => {
       <StatsBar
         balance={balance}
         freeSpins={freeSpins}
-        multiplier={multiplier}
         rank={rank}
       />
       
@@ -298,7 +285,7 @@ const handleSellItem = (item) => {
         <Inventory 
           inventory={inventory} 
           onSell={handleSellItem}
-          onEquip={handleEquipItem}
+          
         />
       )}
       

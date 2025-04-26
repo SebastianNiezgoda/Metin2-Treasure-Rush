@@ -103,7 +103,7 @@ function Inventory({ inventory, onSell, onEquip }) {
     setSelectedItem(item);
   };
 
-  // Zmodyfikowana funkcja do obsługi sprzedaży przedmiotów
+  
   const handleSellItem = (item) => {
     // Bezpośrednio zresetuj selectedItem przed wywołaniem onSell
     setSelectedItem(null);
@@ -313,19 +313,7 @@ function Inventory({ inventory, onSell, onEquip }) {
               >
                 Sprzedaj
               </button>
-              <button 
-                onClick={() => onEquip(selectedItem)}
-                style={{
-                  padding: "5px 10px",
-                  backgroundColor: "#4a8a2c",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "3px",
-                  cursor: "pointer"
-                }}
-              >
-                Załóż
-              </button>
+              
             </div>
           </div>
         </div>

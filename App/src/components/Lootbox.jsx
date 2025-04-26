@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+const clickAudio = new Audio("/assets/sounds/click.mp3");
 
 function Lootbox({ items, onSpin, isSpinning, freeSpins, spinCost, onSpinComplete }) {
   const [displayItem, setDisplayItem] = useState(null);
@@ -31,6 +32,13 @@ function Lootbox({ items, onSpin, isSpinning, freeSpins, spinCost, onSpinComplet
       const timeout = setTimeout(() => {
         const random = items[Math.floor(Math.random() * items.length)];
         setDisplayItem(random);
+      
+        // dzwiek cykacza
+        if (clickAudio) {
+          clickAudio.currentTime = 0; //reset dzwieku cykacza
+          clickAudio.play();
+        }
+      
         setCurrentStep(currentStep + 1);
       }, spinSequence[currentStep]);
 
@@ -48,33 +56,45 @@ function Lootbox({ items, onSpin, isSpinning, freeSpins, spinCost, onSpinComplet
 
   return (
     <div className="lootbox-reel" style={{ textAlign: "center", marginTop: "20px" }}>
-      <div
-        style={{
-          width: "120px",
-          height: "120px",
-          margin: "auto",
-          border: "3px solid #ccc",
-          borderRadius: "8px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "#f8f8f8"
-        }}
-      >
-        {displayItem ? (
-          <>
-            <img
-              src={displayItem.img}
-              alt={displayItem.name}
-              style={{ width: "60px", height: "60px", objectFit: "contain" }}
-            />
-            <div style={{ fontSize: "12px", marginTop: "5px", color: "#000" }}>{displayItem.name}</div>
-          </>
-        ) : (
-          <span style={{ color: "#aaa" }}>?</span>
-        )}
-      </div>
+          <div style={{ margin: "auto", textAlign: "center" }}>
+              {displayItem ? (
+                <>
+                  <div
+                    style={{
+                      width: "120px",
+                      height: "120px",
+                      border: "3px solid #ccc",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      background: "#f8f8f8",
+                      margin: "auto"
+                    }}
+                  >
+                    <img
+                      src={displayItem.img}
+                      alt={displayItem.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover"
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginTop: "8px",
+                      fontWeight: "bold",
+                      color: "#ac7a33"
+                    }}
+                  >
+                    {displayItem.name}
+                  </div>
+                </>
+              ) : (
+                <span style={{ color: "#aaa" }}>?</span>
+              )}
+            </div>
 
       <button
         style={{ marginTop: "20px" }}

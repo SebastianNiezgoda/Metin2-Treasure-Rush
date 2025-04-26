@@ -32,13 +32,8 @@ function GamePage() {
         }));
         setItems(itemList);
       } catch (error) {
-        console.error("Błąd pobierania przedmiotów:", error);
-        // Ustaw przedmioty domyślne jeśli firebase nie zadziała
-        setItems([
-          { id: 1, name: "Miecz Smogorożca", img: "/api/placeholder/60/60", rarity: "legendary", chance: 5, value: 5000 },
-          { id: 2, name: "Zbroja Niebieskiego Smoka", img: "/api/placeholder/60/60", rarity: "epic", chance: 10, value: 2000 },
-          // ...inne przedmioty
-        ]);
+        console.error("Nie można pobrać itemów z bazy danych, sprawdź swoje połączenie i spróboj ponownie", error);
+        
       }
     };
   

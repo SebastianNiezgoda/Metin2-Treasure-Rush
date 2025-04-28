@@ -58,7 +58,7 @@ function ResultModal({ result, onClose }) {
           overflow: "hidden"
         }}
       >
-        {/* Glow effect based on rarity */}
+        {/* Efekt w zaleznosci od rzadkosci */}
         <div style={{
           position: "absolute",
           top: 0,

@@ -7,8 +7,7 @@ function Inventory({ inventory, onSell, onEquip }) {
   const [sortOption, setSortOption] = useState("name-asc");
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // Dodajmy efekt, który będzie monitorować zmiany w inventory
-  // i resetować selectedItem, gdy zostanie on usunięty
+  
   useEffect(() => {
     if (selectedItem && !inventory.some(item => item.inventoryId === selectedItem.inventoryId)) {
       // Jeśli wybrany przedmiot nie istnieje już w ekwipunku, zresetuj wybór
@@ -107,7 +106,7 @@ function Inventory({ inventory, onSell, onEquip }) {
   const handleSellItem = (item) => {
     // Bezpośrednio zresetuj selectedItem przed wywołaniem onSell
     setSelectedItem(null);
-    // Wywołaj funkcję sprzedaży przekazaną jako prop
+    
     onSell(item);
   };
 

@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
-// Konfiguracja projektu Firebase (placeholder – wstawić własne config z Firebase console)
+// Konfiguracja projektu Firebase 
 const firebaseConfig = {
   apiKey: "AIzaSyBRuVYG0hsaldjGQcq5JBSFNP8McmqA6vA",
   authDomain: "metin2-cc447.firebaseapp.com",
